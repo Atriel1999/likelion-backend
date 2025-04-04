@@ -90,13 +90,13 @@ public class OrderService {
 
         System.out.println("log123: " + all.getTotalElements());
 
-        List<OrderResponse> orderResponses = new ArrayList<>();
-        for (OrderEntity orderEntity : all) {
-            orderResponses.add(fromEntity(orderEntity));
-        }
+//        List<OrderResponse> orderResponses = new ArrayList<>();
+//        for (OrderEntity orderEntity : all) {
+//            orderResponses.add(fromEntity(orderEntity));
+//        }
 
 
-//        List<OrderResponse> orderResponses = all.stream().map(OrderMapper:: fromEntity).collect(Collectors.toList());
+        List<OrderResponse> orderResponses = all.stream().map(OrderMapper:: fromEntity).collect(Collectors.toList());
         System.out.println("log123: " + orderResponses.size());
 
         return new OrderListResponse(orderResponses);
