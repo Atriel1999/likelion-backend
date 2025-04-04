@@ -1,5 +1,6 @@
 package com.inspire12.likelionbackend.module.jpa.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inspire12.likelionbackend.module.jpa.model.dto.OrderSum;
 import com.inspire12.likelionbackend.module.jpa.model.entity.OrderEntity;
 import com.inspire12.likelionbackend.module.jpa.model.mapper.OrderMapper;
@@ -12,12 +13,18 @@ import com.inspire12.likelionbackend.module.jpa.repository.OrderJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.inspire12.likelionbackend.module.jpa.model.mapper.OrderMapper.fromEntity;
+import static com.inspire12.likelionbackend.module.jpa.model.mapper.OrderMapper.toEntity;
 
 @RequiredArgsConstructor
 @Service
@@ -30,14 +37,14 @@ public class OrderService {
     public OrderResponse getOrder(Long orderId) {
         OrderEntity order = orderJpaRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("주문 없음"));
-        return OrderMapper.fromEntity(order);
+        return fromEntity(order);
     }
 
     @Transactional
     public OrderResponse saveOrder(OrderRequest request) {
-        OrderEntity order = OrderMapper.toEntity(request);
+        OrderEntity order = toEntity(request);
         OrderEntity savedOrder = orderJpaRepository.save(order);
-        return OrderMapper.fromEntity(savedOrder);
+        return fromEntity(savedOrder);
     }
 
     @Transactional
@@ -52,7 +59,7 @@ public class OrderService {
         OrderEntity order = orderJpaRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("주문 없음"));
         order.changeTotalAmount(newAmount);
-        return OrderMapper.fromEntity(order);
+        return fromEntity(order);
     }
 
 
@@ -73,8 +80,25 @@ public class OrderService {
 
         List<OrderResponse> orderResponses = new ArrayList<>();
         for (OrderEntity orderEntity : all) {
-            orderResponses.add(OrderMapper.fromEntity(orderEntity));
+            orderResponses.add(fromEntity(orderEntity));
         }
+        return new OrderListResponse(orderResponses);
+    }
+
+    public OrderListResponse getOrderItemsByPager(Pageable pageable) {;
+        Page<OrderEntity> all = orderJpaRepository.findAllOrders(pageable);
+
+        System.out.println("log123: " + all.getTotalElements());
+
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (OrderEntity orderEntity : all) {
+            orderResponses.add(fromEntity(orderEntity));
+        }
+
+
+//        List<OrderResponse> orderResponses = all.stream().map(OrderMapper:: fromEntity).collect(Collectors.toList());
+        System.out.println("log123: " + orderResponses.size());
+
         return new OrderListResponse(orderResponses);
     }
 }

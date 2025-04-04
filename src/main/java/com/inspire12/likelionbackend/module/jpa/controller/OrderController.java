@@ -42,7 +42,10 @@ public class OrderController {
 
     // 주문 조회 API
     @GetMapping("/items")
-    public ResponseEntity<OrderListResponse> getOrder() {
+    public ResponseEntity<OrderListResponse> getOrderItems(
+            @PageableDefault(page = 1, size = 10, sort = {"id"}, direction = Sort.Direction.ASC)
+            Pageable pageRequest
+    ) {
         // TODO 구현하기
         OrderListResponse orderByPager = orderService.getOrderItemsByPager(pageRequest);
         return ResponseEntity.ok(orderByPager);
